@@ -1,12 +1,12 @@
 #-----fill in these variables
 
-$rgName = "LVMTest"
+$rgName = "DXHack"
 
-$template = "Template1.json" # local file path specified
+$template = "/Users/jessicadeen/GitHub/musicbrainz-conversation-bot/Scripts/DX_LinuxDocker_Template.json" # local file path specified
 
-$vmName = ”LVMTest”
+$vmName = "DockerClone"
 
-$vhdName = "CoolVHDTest"
+$vhdName = "DXHackDockerClone"
 
  
 
