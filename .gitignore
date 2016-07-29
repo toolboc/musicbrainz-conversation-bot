@@ -33,4 +33,4 @@ _ReSharper*/
 *.[Rr]e[Ss]harper
 *.zip
 *.[Pp]ublish.xml
-*.secrets.*
+Web.secrets.config
