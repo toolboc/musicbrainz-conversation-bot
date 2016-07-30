@@ -53,7 +53,8 @@ namespace MusicBrainzConversations.Mobile.Services
     public class BotService
     {
 
-        private string _APIKEY = "ciCzzZ2ciRk.cwA.now.nUY_kCAK3OiGzjzArWxE2Vn1qNFzlnZrCKp5LH799wE";
+        //private string _APIKEY = "ciCzzZ2ciRk.cwA.now.nUY_kCAK3OiGzjzArWxE2Vn1qNFzlnZrCKp5LH799wE";
+        private string _APIKEY = "182Tn6laWQM.cwA.YWo.1d7mET2AnnEzjdO7gsB447Oi28iw98CPv6eU0QpCw9o";        
         private string botToken;
         private string activeConversation;
         private string activeWatermark;
