@@ -4,5 +4,16 @@ $ENV:AZURE_sTORAGE_ACCESS_KEY = 'HVSlIRF1yb5px+tuyzTiavv2/iGtmCeYrDI35YGaZc48bCe
 $imagename = "musicbrainz"
 $blobUrl = "https://dxhack4423.blob.core.windows.net"
 $localvhdPath = "C:\Users\Jessica Deen\Desktop\musicbrainz\musicbrainz.vhd"
+$container_name = "vhds"
+$destinationfolder = "C:\USers\Jessica Deen\Desktop"
 
-azure storage blob upload $localvhdPath vhds $imagename
+echo "Uploading the image..."
+azure storage blob upload $localvhdPath $container_name $imagename
+
+echo "Listing the image to confirm successful upload..."
+azure storage blob list $container_name
+
+#optional local download command
+echo "Downloading the image to local folder..."
+azure storage blob download $container_name $imagename $destinationfolder
+
