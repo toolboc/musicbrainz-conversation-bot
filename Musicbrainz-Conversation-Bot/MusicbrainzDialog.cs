@@ -9,6 +9,7 @@ using Microsoft.Bot.Builder.Luis.Models;
 using System.Threading.Tasks;
 using Lastfm.Services;
 using System.Configuration;
+using Microsoft.Bot.Connector;
 
 namespace Musicbrainz_Conversation_Bot
 {
@@ -51,11 +52,34 @@ namespace Musicbrainz_Conversation_Bot
 
             var artisan = new ArtistSearch(artist, session).GetFirstMatch();
 
-            string response = "![](" + artisan.GetImageURL() + ")";
-            response = response + artisan.Name + "\n\n" + artisan.Bio.GetSummary();
-            
+            //string response = "![](" + artisan.GetImageURL() + ")\n\n";
+            //response = response + artisan.Name + "\n\n" + artisan.Bio.GetSummary();
 
-            await context.PostAsync(response);
+            Activity replyToConversation = context.MakeMessage() as Activity;
+            replyToConversation.Attachments = new List<Attachment>();
+            List<CardImage> cardImages = new List<CardImage>();
+            cardImages.Add(new CardImage(url: artisan.GetImageURL()));
+
+            List<CardAction> cardButtons = new List<CardAction>();
+            CardAction plButton = new CardAction()
+            {
+                Value = "http://musicbrainz.westus.cloudapp.azure.com:5000/artist/" + artisan.GetMBID(),
+                Type = "openUrl",
+                Title = "More info on our Musicbrainz server"
+            };
+            cardButtons.Add(plButton);
+            HeroCard plCard = new HeroCard()
+            {
+                Title = artisan.Name,
+                Subtitle = artisan.Bio.GetSummary(),
+                Images = cardImages,
+                Buttons = cardButtons
+            };
+            Attachment plAttachment = plCard.ToAttachment();
+            replyToConversation.Attachments.Add(plAttachment);
+
+
+            await context.PostAsync(replyToConversation);
             context.Wait(MessageReceived);
         }
 
@@ -81,15 +105,46 @@ namespace Musicbrainz_Conversation_Bot
 
             var releases = new ArtistSearch(artist, session).GetFirstMatch().GetTopAlbums().DistinctBy(x=>x.Item.Title).Take(5);
 
-            string response = null;
+            Activity replyToConversation = context.MakeMessage() as Activity;
+            replyToConversation.Attachments = new List<Attachment>();
+
+            //string response = null;
             foreach (var release in releases)
             {
+                List<CardImage> cardImages = new List<CardImage>();
+                List<CardAction> cardButtons = new List<CardAction>();
+
+
                 var albumArt = release.Item.GetImageURL();
                 if (albumArt.Length > 10)
-                    response = response + "![](" + albumArt + ")" + "[" + release.Item.Title + "](" + release.Item.URL + ")\n\n"; //" (" + release.Item.GetReleaseDate().Year + ")\n\n";
+                    cardImages.Add(new CardImage(url: albumArt));
+                else
+                    continue;
+
+                CardAction plButton = new CardAction()
+                {
+                    Value = "http://musicbrainz.westus.cloudapp.azure.com:5000/release/" + release.Item.GetMBID(),
+                    Type = "openUrl",
+                    Title = "More info on our Musicbrainz server"
+                };
+
+                cardButtons.Add(plButton);
+                HeroCard plCard = new HeroCard()
+                {
+                    Title = release.Item.Artist.Name,
+                    Subtitle = release.Item.Title,
+                    Images = cardImages,
+                    Buttons = cardButtons
+                };
+
+                Attachment plAttachment = plCard.ToAttachment();
+                replyToConversation.Attachments.Add(plAttachment);
+
+                //response = response + "![](" + albumArt + ")" + "[" + release.Item.Title + "](" + release.Item.URL + ")\n\n"; //" (" + release.Item.GetReleaseDate().Year + ")\n\n";
             }
 
-            await context.PostAsync(response);
+            await context.PostAsync(replyToConversation);
+
             context.Wait(MessageReceived);
         }
 
