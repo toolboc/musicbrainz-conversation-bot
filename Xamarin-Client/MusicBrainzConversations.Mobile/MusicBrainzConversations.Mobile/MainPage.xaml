@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MusicBrainzConversations.Mobile.MainPage"
+             xmlns:vm="clr-namespace:MusicBrainzConversations.Mobile.ViewModels;assembly=MusicBrainzConversations.Mobile">
+
+  <ContentPage.BindingContext>
+    <vm:MainPageViewModel />
+  </ContentPage.BindingContext>
+
+  <ContentPage.Padding>
+    <OnPlatform x:TypeArguments="Thickness">
+      <OnPlatform.iOS>
+        10, 40, 10, 10
+      </OnPlatform.iOS>
+      <OnPlatform.Android>
+        10, 30, 10, 10
+      </OnPlatform.Android>
+      <OnPlatform.WinPhone>
+        10, 30, 10, 10
+      </OnPlatform.WinPhone>
+    </OnPlatform>
+  </ContentPage.Padding>
+
+  <StackLayout>
+    <Label Text="MusicBrainz Conversations Bot"
+           Font="Large"
+           FontAttributes="Bold"
+           HorizontalOptions="Center"/>    
+    <Label Text="{Binding PageTitle}" VerticalOptions="Center" HorizontalOptions="Center" />
+
+    <StackLayout Orientation="Horizontal" VerticalOptions="FillAndExpand">
+      <Entry Text="{Binding TextInput}" FontSize="Medium" HorizontalOptions="StartAndExpand" VerticalOptions="CenterAndExpand" WidthRequest="400" />
+      <Button HorizontalOptions="End" VerticalOptions="CenterAndExpand" Text="Send" Command="{Binding SendMessage}"/>
+    </StackLayout>
+
+    <ListView x:Name="ChatView" ItemsSource="{Binding ChatMessages}">
+      <ListView.ItemTemplate>
+        <DataTemplate>
+          <TextCell Text="{Binding text}" />
+        </DataTemplate>
+      </ListView.ItemTemplate>
+    </ListView>
+
+  </StackLayout>
+  
+</ContentPage>

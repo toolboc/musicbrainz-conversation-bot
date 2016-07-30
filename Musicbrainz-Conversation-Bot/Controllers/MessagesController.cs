@@ -7,6 +7,8 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using Microsoft.Bot.Connector;
 using Newtonsoft.Json;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.FormFlow;
 using System.Configuration;
 
 namespace Musicbrainz_Conversation_Bot
@@ -14,6 +16,10 @@ namespace Musicbrainz_Conversation_Bot
     [BotAuthentication]
     public class MessagesController : ApiController
     {
+        internal static IDialog<MusicBrainzForm> MakeRootDialog()
+        {
+            return Chain.From(() => FormDialog.FromForm(MusicBrainzForm.BuildForm));
+        }
         /// <summary>
         /// POST: api/Messages
         /// Receive a message from a user and reply to it
@@ -22,13 +28,25 @@ namespace Musicbrainz_Conversation_Bot
         {
             if (activity.Type == ActivityTypes.Message)
             {
-                ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
-                // calculate something for us to return
-                int length = (activity.Text ?? string.Empty).Length;
+                //await Conversation.SendAsync(activity, MakeRootDialog);
+                await Conversation.SendAsync(activity, () => new MusicbrainzDialog());
+                //ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
+                //// calculate something for us to return
+                //int length = (activity.Text ?? string.Empty).Length;
+
+                //var result = MusicApiCollection.Sites.MusicBrainz.Search.Artist(activity.Text);
+
+                //// return our reply to the user
+                //Activity reply = activity.CreateReply(result.Response);
+                //await connector.Conversations.ReplyToActivityAsync(reply);
+
+                // Used for debugging
+                //string id = ConfigurationManager.AppSettings["BotId"];
 
                 // return our reply to the user
-                Activity reply = activity.CreateReply($"You sent {activity.Text} which was {length} characters");
-                await connector.Conversations.ReplyToActivityAsync(reply);
+                //Activity reply = activity.CreateReply($"You sent {activity.Text} which was {length} characters");
+                //await connector.Conversations.ReplyToActivityAsync(reply);
+
             }
             else
             {
