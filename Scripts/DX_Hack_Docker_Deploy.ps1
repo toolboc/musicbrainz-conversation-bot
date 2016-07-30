@@ -46,4 +46,18 @@
     ## Create the VM in Azure
     New-AzureRmVM -Location $location -ResourceGroupName $rgName -VM $vm -Verbose
 
+#### Password creation via VMAccess Extension
+$ExtensionName = 'VMAccessForLinux'
+$Publisher = 'Microsoft.OSTCExtensions'
+$Version = '1.4'
 
+$PublicConf = '{}'
+$PrivateConf = '{
+  "username": "vm",
+  "password": "musicbrainz",
+  "reset_ssh": true|false,
+}'
+
+Set-AzureRmVMExtension -ResourceGroupName $RGName -VMName $VmName -Location $Location `
+  -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName `
+  -TypeHandlerVersion $Version -Settingstring $PublicConf -ProtectedSettingString $PrivateConf
