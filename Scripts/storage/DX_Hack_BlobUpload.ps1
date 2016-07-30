@@ -36,8 +36,14 @@ Get-AzureRmStorageAccountKey -Name $storageAccountName -ResourceGroupName $rgnam
 
 $ctx = "[paste storage acccount key here]"
 
+# Storage Container Configure
+$storageContainer = Get-AzureRmStorageAccount –ResourceGroupName $rgName –Name $StorageAccountName | Get-AzureStorageContainer -Container $ContainerName
+
+# Retrieve blob endpoint
+$containerBlob = $storageContainer.Context.BlobEndPoint
+
 # Upload a blob into a container.
-Set-AzureStorageBlobContent -Container $ContainerName -File $ImageToUpload -blob $blobName -BlobType Page -context $ctx
+Add-AzureRmVhd -Destination $mediaLocation -LocalFilePath $ImageToUpload -ResourceGroupName $rgName
 
 # List all blobs in a container.
 Get-AzureStorageBlob -Container $ContainerName
