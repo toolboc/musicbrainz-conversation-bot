@@ -58,7 +58,32 @@ namespace MusicBrainzConversations.Mobile.ViewModels
             }
         }
 
+        private bool _isChatList;
+
+        public bool IsChatList
+        {
+            get { return _isChatList; }
+            set
+            {
+                _isChatList = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _isAlbumList;
+
+        public bool IsAlbumList
+        {
+            get { return _isAlbumList; }
+            set
+            {
+                _isAlbumList = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ObservableCollection<ChatMessage> ChatMessages { get; private set; }
+        public ObservableCollection<Album> Albums { get; private set; }
 
         public Command SendMessage
         {
@@ -75,8 +100,26 @@ namespace MusicBrainzConversations.Mobile.ViewModels
         {
             //_pageTitle = "This is my page title";
             _isActivity = false;
+            //_textInput = "Type your question here.";
 
             ChatMessages = new ObservableCollection<ChatMessage>();
+
+            _isChatList = true;
+            _isAlbumList = false;
+
+            Albums = new ObservableCollection<Album>();
+            Albums.Add(
+                new Album("Metallica", "https://lastfm-img2.akamaized.net/i/u/300x300/35ecb4f7affe489991e91d13f0d00485.png", "http://www.last.fm/music/Metallica/Metallica")                 
+                );
+            Albums.Add(
+                new Album("Master of Puppets", "https://lastfm-img2.akamaized.net/i/u/300x300/07f492a00c904cc6ccf868010be4d5a6.png", "http://www.last.fm/music/Metallica/Master%2bof%2bPuppets")
+            );
+            Albums.Add(
+                new Album("Ride the Lightning", "https://lastfm-img2.akamaized.net/i/u/300x300/dfe9c2366530411396c881090c2039d2.png", "http://www.last.fm/music/Metallica/Ride%2bthe%2bLightning")
+            );
+            Albums.Add(
+                new Album("And Justice for All...", "https://lastfm-img2.akamaized.net/i/u/300x300/55bf2f31f75ac374ccdda18d6204824a.png", "http://www.last.fm/music/Metallica/...and%2bJustice%2bfor%2bAll")
+            );
 
             botService = new BotService();
             LetsGo();
@@ -85,7 +128,17 @@ namespace MusicBrainzConversations.Mobile.ViewModels
         private async Task SendChatMessage()
         {
             var chatText = TextInput;
-            _textInput = "";
+
+            // Temporary so we have the correct format. Need to mab the album object
+
+            if (chatText.Contains("album"))
+            {
+                this.IsAlbumList = true;
+                this.IsChatList = false;
+                return;
+            }
+
+            this.TextInput = "";
 
             // Clear current messages
             ChatMessages.Clear();
@@ -93,7 +146,7 @@ namespace MusicBrainzConversations.Mobile.ViewModels
             // Push question to client
             ChatMessages.Add(new ChatMessage { text = chatText });
 
-            _isActivity = true;
+            this.IsActivity = true;
 
             // Send a message
             if (await botService.SendMessage(chatText))
@@ -103,15 +156,39 @@ namespace MusicBrainzConversations.Mobile.ViewModels
                 for (int i = 1; i < messages.messages.Length; i++)
                 {
                     // Skip over first message
-                    // Push Messages to Client
-                    ChatMessages.Add(new ChatMessage { text = messages.messages[i].text });
+
+                    if (messages.messages[i].text.Contains("https:/"))
+                    {
+                        this.IsAlbumList = true;
+                        this.IsChatList = false;
+                    }
+                    else
+                    {
+                        this.IsAlbumList = false;
+                        this.IsChatList = true;
+                    }
+
+                    if (messages.messages[i].images.Count() > 0)
+                    {
+                        // its an image
+                        var myImage = "http://mbbot.azurewebsites.net" + messages.messages[i].images[i - 1];
+                        //ChatMessages.Add(new ChatMessage { text ="", imgsource = "http://mbbot.azurewebsites.net/" + messages.messages[i].images[i-1] });
+                        // DO NOTHING FOR NOW
+                    }
+                    else
+                    {
+                        // its text
+                        // Push Messages to Client
+                        ChatMessages.Add(new ChatMessage { text = messages.messages[i].text, imgsource = "" });
+                    }
+
                 }
             }
             else
             {
-                ChatMessages.Add(new ChatMessage { text = "Oops! There was an error." });
-            };
-            _isActivity = false;
+                ChatMessages.Add(new ChatMessage { text = "", imgsource= "https://cdn.meme.am/instances/500x/69841816.jpg" });
+                };
+            this.IsActivity = false;
         }
         private async void LetsGo()
         {
