@@ -22,7 +22,10 @@ namespace MusicBrainzConversations.Mobile.ViewModels
         public string PageTitle
         {
             get { return _pageTitle; }
-            set { _pageTitle = value; }
+            set {
+                _pageTitle = value;
+                OnPropertyChanged();
+            }
         }
 
         private string _botResponse;
@@ -38,7 +41,21 @@ namespace MusicBrainzConversations.Mobile.ViewModels
         public string TextInput
         {
             get { return _textInput; }
-            set { _textInput = value; }
+            set {
+                _textInput = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _isActivity;
+
+        public bool IsActivity
+        {
+            get { return _isActivity; }
+            set {
+                _isActivity = value;
+                OnPropertyChanged();
+            }
         }
 
         public ObservableCollection<ChatMessage> ChatMessages { get; private set; }
@@ -56,21 +73,30 @@ namespace MusicBrainzConversations.Mobile.ViewModels
 
         public MainPageViewModel()
         {
-            _pageTitle = "This is my page title";
-            botService = new BotService();
-            ChatMessages = new ObservableCollection<ChatMessage>();
-            //ChatMessages.Add(new ChatMessage { text = "Hey there!" });
+            //_pageTitle = "This is my page title";
+            _isActivity = false;
 
+            ChatMessages = new ObservableCollection<ChatMessage>();
+
+            botService = new BotService();
             LetsGo();
         }
 
         private async Task SendChatMessage()
         {
+            var chatText = TextInput;
+            _textInput = "";
+
+            // Clear current messages
+            ChatMessages.Clear();
+
             // Push question to client
-            ChatMessages.Add(new ChatMessage { text = TextInput });
+            ChatMessages.Add(new ChatMessage { text = chatText });
+
+            _isActivity = true;
 
             // Send a message
-            if (await botService.SendMessage(TextInput))
+            if (await botService.SendMessage(chatText))
             {
                 // Recieve Messages
                 ConversationMessages messages = await botService.GetMessages();
@@ -80,35 +106,17 @@ namespace MusicBrainzConversations.Mobile.ViewModels
                     // Push Messages to Client
                     ChatMessages.Add(new ChatMessage { text = messages.messages[i].text });
                 }
+            }
+            else
+            {
+                ChatMessages.Add(new ChatMessage { text = "Oops! There was an error." });
             };
+            _isActivity = false;
         }
         private async void LetsGo()
         {
             // Start & Create a new conversation
             string ConversationId = await botService.StartConversation();
-
-            //// Send a message
-            //if (await botService.SendMessage("Who plays enter sandman?"))
-            //{
-            //    // Show message
-            //    ConversationMessages messages = await botService.GetMessages();
-            //    for (int i = 0; i < messages.messages.Length; i++)
-            //    {
-            //        ChatMessages.Add(new ChatMessage { text = messages.messages[i].text });
-            //    }
-            //};
-
-            //// Send a message
-            //if (await botService.SendMessage("Who plays Hotel California?"))
-            //{
-            //    // Show message
-            //    ConversationMessages messages = await botService.GetMessages();
-            //    for (int i = 0; i < messages.messages.Length; i++)
-            //    {
-            //        ChatMessages.Add(new ChatMessage { text = messages.messages[i].text });
-            //    }
-            //};
-
         }
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
