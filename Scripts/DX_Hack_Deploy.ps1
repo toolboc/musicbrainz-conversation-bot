@@ -47,6 +47,3 @@
     New-AzureRmVM -Location $location -ResourceGroupName $rgName -VM $vm -Verbose
 
 
-    ##optional musicbrainz Image Test
-    $mediaLocation = "jdcvhds.blob.core.windows.net/vhds/musicbrainz.vhd"
-    Add-AzureVMImage -ImageName musicBrainz -MediaLocation $mediaLocation -OS Linux
