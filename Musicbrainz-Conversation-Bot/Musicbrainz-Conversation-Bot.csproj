@@ -136,6 +136,7 @@
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
+    <None Include="Web.secrets.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MusicBrainz\MusicBrainz\MusicBrainz.csproj">

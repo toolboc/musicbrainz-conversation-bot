@@ -9,6 +9,7 @@ using Microsoft.Bot.Connector;
 using Newtonsoft.Json;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.FormFlow;
+using System.Configuration;
 
 namespace Musicbrainz_Conversation_Bot
 {
@@ -38,6 +39,14 @@ namespace Musicbrainz_Conversation_Bot
                 //// return our reply to the user
                 //Activity reply = activity.CreateReply(result.Response);
                 //await connector.Conversations.ReplyToActivityAsync(reply);
+
+                // Used for debugging
+                //string id = ConfigurationManager.AppSettings["BotId"];
+
+                // return our reply to the user
+                //Activity reply = activity.CreateReply($"You sent {activity.Text} which was {length} characters");
+                //await connector.Conversations.ReplyToActivityAsync(reply);
+
             }
             else
             {
