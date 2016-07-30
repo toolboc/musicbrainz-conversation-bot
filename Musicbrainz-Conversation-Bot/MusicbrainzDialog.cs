@@ -7,6 +7,8 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 using System.Threading.Tasks;
+using Lastfm.Services;
+using System.Configuration;
 
 namespace Musicbrainz_Conversation_Bot
 {
@@ -14,10 +16,14 @@ namespace Musicbrainz_Conversation_Bot
     [Serializable]
     public class MusicbrainzDialog : LuisDialog<object>
     {
+        public MusicbrainzDialog(params ILuisService[] services) : base(services)
+        {
+        }
+
         [LuisIntent("")]
         public async Task None(IDialogContext context, LuisResult result)
         {
-            string message = $"Sorry I did not understand: " + string.Join(", ", result.Intents.Select(i => i.Intent));
+            string message = "Here is a list of things I can do: \n\n Show me top songs from <Artist> \n\n Who sings <Song> \n\n Give me albums by <Artist> \n\n Tell me about <Artist>. ";
             await context.PostAsync(message);
             context.Wait(MessageReceived);
         }
@@ -32,14 +38,22 @@ namespace Musicbrainz_Conversation_Bot
             {
                 artist = artistEntity.Entity;
             }
-
-            var artists = MusicBrainz.Search.Artist(artist, limit: 10);
-
-            string response = null;
-            foreach (var artisan in artists.Data)
+            else
             {
-                response = response + artisan.Name + " | " + artisan.Type + " | " + artisan.Country + " | " + artisan.Disambiguation + " | " + "(" + artisan.Score + "%)\n\n";
+                await context.PostAsync("I think you are searching for a particular artist, but I do not know how to act on your request at this time");
+                context.Wait(MessageReceived);
+                return;
             }
+
+
+            string LastFmKey = ConfigurationManager.AppSettings["LastFMKey"];
+            Session session = new Session(LastFmKey, "apiSecret");
+
+            var artisan = new ArtistSearch(artist, session).GetFirstMatch();
+
+            string response = "![](" + artisan.GetImageURL() + ")";
+            response = response + artisan.Name + "\n\n" + artisan.Bio.GetSummary();
+            
 
             await context.PostAsync(response);
             context.Wait(MessageReceived);
@@ -55,13 +69,24 @@ namespace Musicbrainz_Conversation_Bot
             {
                 artist = artistEntity.Entity;
             }
+            else
+            {
+                await context.PostAsync("I think you are searching for albums by a particular artist, but I do not know how to act on your request at this time");
+                context.Wait(MessageReceived);
+                return;
+            }
 
-            var releases = MusicBrainz.Search.ReleaseGroup(artist: artist, type: "Album", limit: 5);
+            string LastFmKey = ConfigurationManager.AppSettings["LastFMKey"];
+            Session session = new Session(LastFmKey, "apiSecret");
+
+            var releases = new ArtistSearch(artist, session).GetFirstMatch().GetTopAlbums().DistinctBy(x=>x.Item.Title).Take(5);
 
             string response = null;
-            foreach (var release in releases.Data)
+            foreach (var release in releases)
             {
-                response = response + release.Title + " (" + release.Score + "%)\n\n";
+                var albumArt = release.Item.GetImageURL();
+                if (albumArt.Length > 10)
+                    response = response + "![](" + albumArt + ")" + "[" + release.Item.Title + "](" + release.Item.URL + ")\n\n"; //" (" + release.Item.GetReleaseDate().Year + ")\n\n";
             }
 
             await context.PostAsync(response);
@@ -78,6 +103,13 @@ namespace Musicbrainz_Conversation_Bot
             {
                 album = albumEntity.Entity;
             }
+            else
+            {
+                await context.PostAsync("I think you are searching for artists songs on an album, but I do not know how to act on your request at this time");
+                context.Wait(MessageReceived);
+                return;
+            }
+
 
             var releaseGroup = MusicBrainz.Search.ReleaseGroup(album, limit: 1);
 
@@ -93,6 +125,75 @@ namespace Musicbrainz_Conversation_Bot
             context.Wait(MessageReceived);
         }
 
+        [LuisIntent("SimilarArtists")]
+        public async Task SimilarArtists(IDialogContext context, LuisResult result)
+        {
+            EntityRecommendation artistEntity;
+            string artist = null;
+
+            if (result.TryFindEntity("Artist", out artistEntity))
+            {
+                artist = artistEntity.Entity;
+            }
+            else
+            {
+                await context.PostAsync("I think you are searching for artists similar to an artist, but I do not know how to act on your request at this time");
+                context.Wait(MessageReceived);
+                return;
+            }
+
+            string LastFmKey = ConfigurationManager.AppSettings["LastFMKey"];
+            Session session = new Session(LastFmKey, "apiSecret");
+
+            var artistSearch = new ArtistSearch(artist, session);
+            var similarArtists = artistSearch.GetFirstMatch().GetSimilar().Take(10);
+
+            string response = null;
+            foreach (var artisan in similarArtists)
+            {
+
+                response = response + "[" + artisan.Name + "](" + artisan.URL +")\n\n";
+
+            }
+
+            await context.PostAsync(response);
+            context.Wait(MessageReceived);
+        }
+
+        [LuisIntent("TopTracks")]
+        public async Task TopTracks(IDialogContext context, LuisResult result)
+        {
+            EntityRecommendation artistEntity;
+            string artist = null;
+
+            if (result.TryFindEntity("Artist", out artistEntity))
+            {
+                artist = artistEntity.Entity;
+            }
+            else
+            {
+                await context.PostAsync("I think you are searching for top songs by an artist, but I do not know how to act on your request at this time");
+                context.Wait(MessageReceived);
+                return;
+            }
+
+            string LastFmKey = ConfigurationManager.AppSettings["LastFMKey"];
+            Session session = new Session(LastFmKey, "apiSecret");
+
+            var artistSearch = new ArtistSearch(artist, session);
+            var topTracks = artistSearch.GetFirstMatch().GetTopTracks().Take(10);
+
+            string response = null;
+            foreach (var track in topTracks)
+            {
+
+                response = response + track.Item.Title + "\n\n";
+
+            }
+
+            await context.PostAsync(response);
+            context.Wait(MessageReceived);
+        }
 
         [LuisIntent("SongSearch")]
         public async Task SongSearch(IDialogContext context, LuisResult result)
@@ -104,8 +205,14 @@ namespace Musicbrainz_Conversation_Bot
             {
                 song = artistEntity.Entity;
             }
+            else
+            {
+                await context.PostAsync("I think you are searching for an artist that plays a particular song, but I do not know how to act on your request at this time");
+                context.Wait(MessageReceived);
+                return;
+            }
 
-            var recordings = MusicBrainz.Search.Recording(song, limit: 3);
+            var recordings = MusicBrainz.Search.Recording(song, limit: 10);
 
             string response = null;
             foreach(var recording in recordings.Data)
