@@ -1,10 +1,10 @@
 ﻿##### Variables
     ## Global
-    $rgName = "DXHack_MusicBrainz"
+    $rgName = "DXHack_MusicBrainz1"
     $location = "westus"
 
     ## Storage
-    $storageName = "musicbrainz0729" #use lowercase and numbers
+    $storageName = "musicbrainz0730" #use lowercase and numbers
     $storageType = "Standard_GRS"
 
     ## Network
@@ -45,3 +45,8 @@
  
     ## Create the VM in Azure
     New-AzureRmVM -Location $location -ResourceGroupName $rgName -VM $vm -Verbose
+
+
+    ##optional musicbrainz Image Test
+    $mediaLocation = "jdcvhds.blob.core.windows.net/vhds/musicbrainz.vhd"
+    Add-AzureVMImage -ImageName musicBrainz -MediaLocation $mediaLocation -OS Linux
