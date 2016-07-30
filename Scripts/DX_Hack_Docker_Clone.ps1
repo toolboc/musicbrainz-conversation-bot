@@ -8,6 +8,9 @@ $vmName = "DockerClone"
 
 $vhdName = "DXHackDockerClone"
 
+$localfilepath = "C:\Users\Jessica Deen\Documents\GitHub\musicbrainz-conversation-bot\Images"
+
+$sourceUri = "https://dxhack4423.blob.core.windows.net/system/Microsoft.Compute/Images/vhds/DXHackDockerClone-osDisk.ae2e253d-e28f-4ff9-8fb0-848f7f77e2db.vhd"
  
 
 #-----stop the vm
@@ -20,4 +23,4 @@ azure vm generalize $rgName -n $vmName
 azure vm capture $rgName $vmName $vhdName -t $template
 
 #-----save VHD
-Save-AzureRmVhd -ResourceGroupName $rgName -SourceUri "https://dxhack4423.blob.core.windows.net/system/Microsoft.Compute/Images/vhds/DXHackDockerClone-osDisk.ae2e253d-e28f-4ff9-8fb0-848f7f77e2db.vhd" -LocalFilePath "C:\Users\Jessica Deen\Documents\GitHub\musicbrainz-conversation-bot\Images\DXHackDockerClone.vhd"
+Save-AzureRmVhd -ResourceGroupName $rgName -SourceUri $sourceUri -LocalFilePath $localfilepath\$vhdName
