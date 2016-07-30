@@ -42,8 +42,8 @@ Set-AzureStorageBlobContent -Container $ContainerName -File $ImageToUpload -blob
 # List all blobs in a container.
 Get-AzureStorageBlob -Container $ContainerName
 
-#optional musicbrainz Add Blob to VMImage
-$mediaLocation = "jdcvhds.blob.core.windows.net/vhds/musicbrainz.vhd"
+# Add Image to Azure Index
+$mediaLocation = "https://jdcvhds.blob.core.windows.net/vhds/musicbrainz.vhd"
 Add-AzureVMImage -ImageName musicBrainz -MediaLocation $mediaLocation -OS Linux
 
 
