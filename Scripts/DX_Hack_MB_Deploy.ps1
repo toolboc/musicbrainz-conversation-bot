@@ -1,6 +1,9 @@
-﻿##### Variables
+﻿Login-AzureRMAccount
+
+
+##### Variables
     ## Global
-    $rgName = "DXHack_MusicBrainz"
+    $rgName = "MusicBrainz"
     $location = "westus"
 
     ## Storage
@@ -15,10 +18,11 @@
     $vnetSubnetAddressPrefix = "10.0.0.0/24"
 
     ## Compute
-    $vmName = "MusicBrainz"
+    $vmName = "MusicBrainzServer"
     $computerName = "MBComputer"
     $vmSize = "Standard_A2"
     $osDiskName = $vmName + "osDisk"
+    $urlOfUploadedImageVhd = "https://jdcvhds.blob.core.windows.net/vhds/MusicBrainz.vhd"
 
 ##### Resource Group
     New-AzureRMResourceGroup -Name $rgName -Location $location
@@ -55,8 +59,6 @@ $osDiskUri = '{0}vhds/{1}{2}.vhd' -f $storageAcc.PrimaryEndpoints.Blob.ToString(
 
 #Configure the OS disk to be created from the image (-CreateOption fromImage), and give the URL of the uploaded image VHD for the -SourceImageUri parameter
 #You can find this URL in the result of the Add-AzureRmVhd cmdlet above
-
-$urlOfUploadedImageVhd = "https://jdcvhds.blob.core.windows.net/vhds/MusicBrainz.vhd"
 
 $vm = Set-AzureRmVMOSDisk -VM $vm -Name $osDiskName -VhdUri $osDiskUri -CreateOption fromImage -SourceImageUri $urlOfUploadedImageVhd -Linux
 

@@ -22,6 +22,8 @@
     </OnPlatform>
   </ContentPage.Padding>
 
+  <ActivityIndicator Color="Red" IsRunning="{Binding IsActivity}" IsVisible="{Binding IsActivity}" WidthRequest="100"/>
+  
   <StackLayout>
     <Image Source="http://dudebotapp.azurewebsites.net/logo.png" WidthRequest="200"/>
     <Label Text="MusicBrainz Conversations Bot"
@@ -30,21 +32,34 @@
            HorizontalOptions="Center"/>    
     <Label Text="{Binding PageTitle}" VerticalOptions="Center" HorizontalOptions="Center" />
 
-    <ActivityIndicator Color="Red" IsRunning="{Binding IsActivity}" IsVisible="{Binding IsActivity}" WidthRequest="100"/>
-    
     <StackLayout Orientation="Vertical">
-      <Entry Text="{Binding TextInput, Mode=TwoWay}" FontSize="Medium" />
-      <Button Text="Send" Command="{Binding SendMessage}"/>
+      <Entry Text="{Binding TextInput}" FontSize="Medium" />
+      <Button Text="Send Message" Command="{Binding SendMessage}"/>
     </StackLayout>
 
-    <ListView x:Name="ChatView" ItemsSource="{Binding ChatMessages}" HasUnevenRows="True">
+    <ListView x:Name="ChatView" ItemsSource="{Binding ChatMessages}" HasUnevenRows="True" IsVisible="{Binding IsChatList}">
       <ListView.ItemTemplate>
         <DataTemplate>
           <ViewCell>
-            <ViewCell.View Height="">
-              <Label Text="{Binding text}"/>
+            <ViewCell.View>
+              <StackLayout>
+                <Image Source="{Binding imgsource}"  />
+                <Label Text="{Binding text}"/>
+              </StackLayout>
             </ViewCell.View>
           </ViewCell>
+        </DataTemplate>
+      </ListView.ItemTemplate>
+    </ListView>
+
+    <ListView x:Name="AlbumView" ItemsSource="{Binding Albums}" IsVisible="{Binding IsAlbumList}">
+      <ListView.ItemTemplate>
+        <DataTemplate>
+          <ImageCell
+            Text="{Binding AlbumTitle}"
+            Detail="{Binding AlbumURL, StringFormat='{0}'}"
+            ImageSource="{Binding AlbumArt}">
+          </ImageCell>
         </DataTemplate>
       </ListView.ItemTemplate>
     </ListView>

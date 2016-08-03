@@ -10,5 +10,6 @@ namespace MusicBrainzConversations.Mobile.Entities
     {
         public string from { get; set; }
         public string text { get; set; }
+        public string imgsource { get; set; }
     }
 }
