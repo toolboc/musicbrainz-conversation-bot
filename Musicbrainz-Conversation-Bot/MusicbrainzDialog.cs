@@ -24,7 +24,7 @@ namespace Musicbrainz_Conversation_Bot
         [LuisIntent("")]
         public async Task None(IDialogContext context, LuisResult result)
         {
-            string message = "Here is a list of things I can do: \n\n Show me top songs from <Artist> \n\n Who sings <Song> \n\n Give me albums by <Artist> \n\n Tell me about <Artist>. ";
+            string message = "Here is a list of things I can do: \n\n Show me top songs from <Artist> \n\n Who sings <Song> \n\n Give me albums by <Artist> \n\n Tell me about <Artist> \n\n Who sounds like <Artist> ";
             await context.PostAsync(message);
             context.Wait(MessageReceived);
         }
