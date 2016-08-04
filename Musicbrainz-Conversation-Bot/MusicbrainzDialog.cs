@@ -107,40 +107,51 @@ namespace Musicbrainz_Conversation_Bot
 
             Activity replyToConversation = context.MakeMessage() as Activity;
             replyToConversation.Attachments = new List<Attachment>();
-
+            replyToConversation.AttachmentLayout = AttachmentLayoutTypes.Carousel;
             //string response = null;
-            foreach (var release in releases)
-            {
-                List<CardImage> cardImages = new List<CardImage>();
-                List<CardAction> cardButtons = new List<CardAction>();
 
-
-                var albumArt = release.Item.GetImageURL();
-                if (albumArt.Length > 10)
-                    cardImages.Add(new CardImage(url: albumArt));
-                else
-                    continue;
-
-                CardAction plButton = new CardAction()
+                foreach (var release in releases)
                 {
-                    Value = "http://musicbrainz.westus.cloudapp.azure.com:5000/release/" + release.Item.GetMBID(),
-                    Type = "openUrl",
-                    Title = "More info on our Musicbrainz server"
-                };
+                    List<CardImage> cardImages = new List<CardImage>();
+                    List<CardAction> cardButtons = new List<CardAction>();
 
-                cardButtons.Add(plButton);
-                HeroCard plCard = new HeroCard()
-                {
-                    Title = release.Item.Artist.Name,
-                    Subtitle = release.Item.Title,
-                    Images = cardImages,
-                    Buttons = cardButtons
-                };
 
-                Attachment plAttachment = plCard.ToAttachment();
-                replyToConversation.Attachments.Add(plAttachment);
+                    var albumArt = release.Item.GetImageURL();
+                    if (albumArt.Length > 10)
+                        cardImages.Add(new CardImage(url: albumArt));
+                    else
+                        continue;
 
-                //response = response + "![](" + albumArt + ")" + "[" + release.Item.Title + "](" + release.Item.URL + ")\n\n"; //" (" + release.Item.GetReleaseDate().Year + ")\n\n";
+                    try
+                    {
+                        CardAction plButton = new CardAction()
+                        {
+                            Value = "http://musicbrainz.westus.cloudapp.azure.com:5000/release/" + release.Item.GetMBID(),
+                            Type = "openUrl",
+                            Title = "More info on our Musicbrainz server"
+                        };
+
+                        cardButtons.Add(plButton);
+                    }
+                    catch
+                    {
+                        //Could not find MBID
+                    }
+
+
+                    HeroCard plCard = new HeroCard()
+                    {
+                        Title = release.Item.Artist.Name,
+                        Subtitle = release.Item.Title,
+                        Images = cardImages,
+                        Buttons = cardButtons
+                    };
+
+                    Attachment plAttachment = plCard.ToAttachment();
+                    replyToConversation.Attachments.Add(plAttachment);
+
+                    //response = response + "![](" + albumArt + ")" + "[" + release.Item.Title + "](" + release.Item.URL + ")\n\n"; //" (" + release.Item.GetReleaseDate().Year + ")\n\n";
+                
             }
 
             await context.PostAsync(replyToConversation);
