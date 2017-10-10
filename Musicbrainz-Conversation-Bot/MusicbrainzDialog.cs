@@ -13,7 +13,7 @@ using Microsoft.Bot.Connector;
 
 namespace Musicbrainz_Conversation_Bot
 {
-    [LuisModel("f49e3852-e143-46a7-98d4-91015ebbe130", "c2a3406f86e649459245d7b3960980ac")]
+    [LuisModel("f49e3852-e143-46a7-98d4-91015ebbe130", "YOURLUISKEY")]
     [Serializable]
     public class MusicbrainzDialog : LuisDialog<object>
     {
